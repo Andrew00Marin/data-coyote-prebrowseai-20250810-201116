@@ -2,4 +2,6 @@ streamlit
 fastapi
 uvicorn[standard]
 requests
+pandas
+
 
