@@ -84,4 +84,70 @@ def santafe_crime(
             "longitude": float(lon) if lon not in (None, "") else None,
         })
     return out
+from fastapi import FastAPI
+import requests
+
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return {"name": "Data Coyote API", "status": "running"}
+
+@app.get("/health")
+def health():
+    return {"ok": True, "message": "pong"}
+
+# New endpoint for Santa Fe crime
+@app.get("/santafe/crime")
+def get_crime(days: int = 7, limit: int = 200):
+    """
+    Fetch Santa Fe police incidents from New Mexico Open Data API.
+    """
+    # Open Data API for Santa Fe police incidents
+    url = "https://opendata.arcgis.com/datasets/1c7c80f9b6c7477c80f61666d3fa1e1f_0.geojson"
+    
+    try:
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        
+        # Trim to features only
+        features = data.get("features", [])[:limit]
+        return features
+    
+    except Exception as e:
+        return {"error": str(e)}
+from fastapi import FastAPI
+import requests
+
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return {"name": "Data Coyote API", "status": "running"}
+
+@app.get("/health")
+def health():
+    return {"ok": True, "message": "pong"}
+
+# New endpoint for Santa Fe crime
+@app.get("/santafe/crime")
+def get_crime(days: int = 7, limit: int = 200):
+    """
+    Fetch Santa Fe police incidents from New Mexico Open Data API.
+    """
+    # Open Data API for Santa Fe police incidents
+    url = "https://opendata.arcgis.com/datasets/1c7c80f9b6c7477c80f61666d3fa1e1f_0.geojson"
+    
+    try:
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        
+        # Trim to features only
+        features = data.get("features", [])[:limit]
+        return features
+    
+    except Exception as e:
+        return {"error": str(e)}
 

@@ -3,5 +3,5 @@ fastapi
 uvicorn[standard]
 requests
 pandas
-
+matplotlib
 

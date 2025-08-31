@@ -65,4 +65,33 @@ if submitted:
                     st.info("No mappable coordinates in this window.")
     except Exception as e:
         st.error(f"Error loading incidents: {e}")
+import streamlit as st
+import requests
+import pandas as pd
+
+st.set_page_config(page_title="Data Coyote", page_icon="🐺")
+
+st.title("🐺 Data Coyote – Minimal Dashboard (Cloud)")
+st.subheader("Santa Fe Police Incidents")
+
+API_URL = "https://your-fastapi-service.onrender.com"  # change to your Render backend
+
+with st.form("crime_controls"):
+    lookback = st.slider("Days back", 1, 60, 7)
+    max_rows = st.selectbox("Max rows", [200, 500, 1000], index=0)
+    submitted = st.form_submit_button("Load incidents")
+
+if submitted:
+    try:
+        resp = requests.get(f"{API_URL}/santafe/crime", params={"days": lookback, "limit": max_rows}, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        
+        if not data:
+            st.warning("No data available.")
+        else:
+            df = pd.json_normalize(data)
+            st.dataframe(df.head(20))
+    except Exception as e:
+        st.error(f"Failed to load crime data: {e}")
 
