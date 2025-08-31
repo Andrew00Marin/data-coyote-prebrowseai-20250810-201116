@@ -1,0 +1,8 @@
+pandas>=2.2.2
+requests>=2.32.3
+python-dotenv>=1.0.1
+PyYAML>=6.0.2
+# Optional for Google Sheets publishing:
+gspread>=6.1.2
+google-auth>=2.34.0
+openpyxl>=3.1.5

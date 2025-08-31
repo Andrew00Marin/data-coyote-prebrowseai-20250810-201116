@@ -1,0 +1,3 @@
+date,crime_type,neighborhood,lat,lon,year,month,dow,hour
+2025-07-01 12:00:00,Assault,Downtown,35.68,-105.94,2025,7,Tuesday,12
+2025-07-04 21:30:00,Burglary,Midtown,35.67,-105.96,2025,7,Friday,21

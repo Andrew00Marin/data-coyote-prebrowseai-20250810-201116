@@ -1,0 +1,31 @@
+project:
+  name: "Data Coyote"
+  city: "Santa Fe"
+  state: "NM"
+  timezone: "America/Denver"
+
+sources:
+  crime:
+    local_path: "data/raw/sample_crime.csv"
+    url: "${FBI_API_URL_BASE}${FBI_API_KEY}"
+    date_column: "data_year"
+    type_column: "offense"
+    neighborhood_column: ""
+    lat_column: ""
+    lon_column: ""
+
+  tourism:
+    local_path: "data/raw/sample_tourism.csv"
+    url: "${TOURISM_DATA_URL}"
+    date_column: "month"
+    metrics: ["visits","hotel_occupancy"]
+
+publish:
+  google_sheets:
+    enabled: false
+    spreadsheet_name_env: "GOOGLE_SHEETS_DOC_NAME"
+    crime_sheet_env: "CRIME_SHEET_NAME"
+    tourism_sheet_env: "TOURISM_SHEET_NAME"
+  files:
+    enabled: true
+    out_dir: "data/processed"

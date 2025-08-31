@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<workbook original-version='18.1' source-build='20201.20.0312.0815'>
+  <datasources>
+    <datasource name='Crime Data (Data Coyote)' hasconnection='true'>
+      <connection class='textscan' dbname='data/processed/crime_latest.csv' delimiter=',' />
+    </datasource>
+    <datasource name='Tourism Data (Data Coyote)' hasconnection='true'>
+      <connection class='textscan' dbname='data/processed/tourism_latest.csv' delimiter=',' />
+    </datasource>
+  </datasources>
+  <worksheets>
+    <worksheet name='Crime Over Time'/>
+    <worksheet name='Crime by Category'/>
+    <worksheet name='Tourism Trend'/>
+  </worksheets>
+  <dashboards>
+    <dashboard name='Data Coyote Dashboard'>
+      <zone type='layout-container' name='root'/>
+    </dashboard>
+  </dashboards>
+</workbook>

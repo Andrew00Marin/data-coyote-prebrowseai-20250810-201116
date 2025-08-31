@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+.DS_Store
+config/service_account.json
+data/processed/*.parquet

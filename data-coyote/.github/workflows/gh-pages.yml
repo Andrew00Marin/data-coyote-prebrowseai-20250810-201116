@@ -1,0 +1,62 @@
+name: Publish Data Coyote to GitHub Pages
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: "30 13 * * *"  # ~07:30 America/Denver
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Create .env
+        env:
+          FBI_API_KEY: ${{ secrets.FBI_API_KEY }}
+          FBI_API_URL_BASE: ${{ secrets.FBI_API_URL_BASE }}
+          TOURISM_DATA_URL: ${{ secrets.TOURISM_DATA_URL }}
+          GOOGLE_SHEETS_DOC_NAME: ${{ secrets.GOOGLE_SHEETS_DOC_NAME }}
+        run: |
+          echo "FBI_API_KEY=${FBI_API_KEY}" >> .env
+          if [ -n "${FBI_API_URL_BASE}" ]; then echo "FBI_API_URL_BASE=${FBI_API_URL_BASE}" >> .env; fi
+          if [ -n "${TOURISM_DATA_URL}" ]; then echo "TOURISM_DATA_URL=${TOURISM_DATA_URL}" >> .env; fi
+          if [ -n "${GOOGLE_SHEETS_DOC_NAME}" ]; then echo "GOOGLE_SHEETS_DOC_NAME=${GOOGLE_SHEETS_DOC_NAME}" >> .env; fi
+          echo "FBI_STATE_ABBR=${{ secrets.FBI_STATE_ABBR || 'NM' }}" >> .env
+          echo "FBI_CITY_NAME=${{ secrets.FBI_CITY_NAME || 'SANTA FE' }}" >> .env
+          echo "FBI_FROM_YEAR=${{ secrets.FBI_FROM_YEAR || '2019' }}" >> .env
+          echo "FBI_TO_YEAR=${{ secrets.FBI_TO_YEAR || '2025' }}" >> .env
+      - name: Run agent
+        run: |
+          source .venv/bin/activate
+          python main.py
+      - name: Prepare site
+        run: |
+          mkdir -p site/data/processed
+          cp -f data/processed/crime_latest.csv site/data/processed/crime_latest.csv
+          cp -f data/processed/tourism_latest.csv site/data/processed/tourism_latest.csv
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: site }
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

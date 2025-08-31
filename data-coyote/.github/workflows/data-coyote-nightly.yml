@@ -1,0 +1,59 @@
+name: Data Coyote Nightly
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 13 * * *"  # ~07:00 America/Denver
+permissions:
+  contents: write
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Create .env
+        env:
+          FBI_API_KEY: ${{ secrets.FBI_API_KEY }}
+          FBI_API_URL_BASE: ${{ secrets.FBI_API_URL_BASE }}
+          TOURISM_DATA_URL: ${{ secrets.TOURISM_DATA_URL }}
+          GOOGLE_SHEETS_DOC_NAME: ${{ secrets.GOOGLE_SHEETS_DOC_NAME }}
+        run: |
+          echo "FBI_API_KEY=${FBI_API_KEY}" >> .env
+          if [ -n "${FBI_API_URL_BASE}" ]; then echo "FBI_API_URL_BASE=${FBI_API_URL_BASE}" >> .env; fi
+          if [ -n "${TOURISM_DATA_URL}" ]; then echo "TOURISM_DATA_URL=${TOURISM_DATA_URL}" >> .env; fi
+          if [ -n "${GOOGLE_SHEETS_DOC_NAME}" ]; then echo "GOOGLE_SHEETS_DOC_NAME=${GOOGLE_SHEETS_DOC_NAME}" >> .env; fi
+          echo "FBI_STATE_ABBR=${{ secrets.FBI_STATE_ABBR || 'NM' }}" >> .env
+          echo "FBI_CITY_NAME=${{ secrets.FBI_CITY_NAME || 'SANTA FE' }}" >> .env
+          echo "FBI_FROM_YEAR=${{ secrets.FBI_FROM_YEAR || '2019' }}" >> .env
+          echo "FBI_TO_YEAR=${{ secrets.FBI_TO_YEAR || '2025' }}" >> .env
+      - name: Add Google service account (optional)
+        if: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON != '' }}
+        env: { GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }} }
+        run: |
+          mkdir -p config
+          echo "${GOOGLE_SERVICE_ACCOUNT_JSON}" > config/service_account.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=./config/service_account.json" >> .env
+      - name: Run
+        run: |
+          source .venv/bin/activate
+          python main.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: data-coyote-processed
+          path: |
+            data/processed/crime_latest.csv
+            data/processed/tourism_latest.csv
+      - name: Commit processed data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/processed/*.csv || true
+          git commit -m "Data Coyote: nightly refresh" || echo "No changes"
+          git push || true
