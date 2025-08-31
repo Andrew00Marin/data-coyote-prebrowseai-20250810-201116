@@ -74,8 +74,7 @@ st.set_page_config(page_title="Data Coyote", page_icon="🐺")
 st.title("🐺 Data Coyote – Minimal Dashboard (Cloud)")
 st.subheader("Santa Fe Police Incidents")
 
-API_URL = "API_URL = "http://127.0.0.1:8000"
-"  # change to your Render backend
+API_URL = "http://127.0.0.1:8000"
 
 with st.form("crime_controls_form"):
     lookback = st.slider("Days back", 1, 60, 7)
