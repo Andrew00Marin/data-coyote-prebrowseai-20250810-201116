@@ -76,7 +76,7 @@ st.subheader("Santa Fe Police Incidents")
 
 API_URL = "https://your-fastapi-service.onrender.com"  # change to your Render backend
 
-with st.form("crime_controls"):
+with st.form("crime_controls_form"):
     lookback = st.slider("Days back", 1, 60, 7)
     max_rows = st.selectbox("Max rows", [200, 500, 1000], index=0)
     submitted = st.form_submit_button("Load incidents")
